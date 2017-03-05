@@ -1,0 +1,29 @@
+#!/usr/bin/ruby
+# Copyright 2017 Wojciech Adam Koszek <wojciech@koszek.com>
+
+EX_USAGE = 64
+
+if `which lpass`.length() == 0 then
+  print "You don't have the 'lpass' command tool\n"
+  exit EX_USAGE
+end
+
+var_name = "LASTPASS_ANSIBLE_NAME"
+if not ENV.has_key?(var_name) then
+  print "Pass name Lastpass Vault name via #{var_name}\n"
+  exit EX_USAGE
+end
+
+stdout = IO.try_convert(STDOUT)
+if stdout == nil or stdout.isatty then
+  print "lastpass-ansible won't print Ansible Vault password to terminal\n"
+  exit EX_USAGE
+end
+
+var_name = "LASTPASS_ANSIBLE_WRONG_PASS_SIM"
+if ENV.has_key?(var_name) then
+  print "WrongPassword"
+  exit 0
+end
+
+system("lpass show --password #{ENV['LASTPASS_ANSIBLE_NAME']}")
