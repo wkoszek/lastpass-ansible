@@ -2,22 +2,25 @@
 # Copyright 2017 Wojciech Adam Koszek <wojciech@koszek.com>
 
 EX_USAGE = 64
+NAME = "lastpass-ansible"
+
+def errfail(s)
+  STDERR.puts "#{NAME}: #{s}\n"
+  exit EX_USAGE
+end
 
 if `which lpass`.length() == 0 then
-  print "You don't have the 'lpass' command tool\n"
-  exit EX_USAGE
+  errfail("You don't have the 'lpass' command tool")
 end
 
 var_name = "LASTPASS_ANSIBLE_NAME"
 if not ENV.has_key?(var_name) then
-  print "Pass name Lastpass Vault name via #{var_name}\n"
-  exit EX_USAGE
+  errfail("Set Lastpass Vault account name via #{var_name}")
 end
 
 stdout = IO.try_convert(STDOUT)
 if stdout == nil or stdout.isatty then
-  print "lastpass-ansible won't print Ansible Vault password to terminal\n"
-  exit EX_USAGE
+  errfail("Won't print Ansible Vault password to terminal")
 end
 
 var_name = "LASTPASS_ANSIBLE_WRONG_PASS_SIM"
