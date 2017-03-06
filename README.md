@@ -12,11 +12,19 @@ secrets in LastPass, and not worry about forgetting your passwords.
 You should also use LastPass's strong password generator for your Ansible
 Vault password.
 
-# How to use?
+The 'lastpass-ansible' is designed so that it integrates easily with your
+existing flow.
 
-You install the tool in the terminal and point Ansible to it:
+# How to install
+
+You install the tool in the terminal:
 
 	gem install lastpass-ansible
+
+# How to use
+
+You must point Ansible to use `lastpass-ansible`:
+
 	export ANSIBLE_VAULT_PASSWORD_FILE=`command -v lastpass-ansible`
 
 Now assume you're in your web application directory:
@@ -41,9 +49,12 @@ Type your old password, and paste your new password.
 
 File `.lastpass-ansible.conf` has been created along with the password. You
 can remove this file if the hierarchy `Ansible_Vault/....` is fine with you.
-If you're a picky person OR you want to point `lastpass-ansible` to an
-existing hierarchy of Vaults, just stick it to `.lastpass-ansible.conf`.
-It's format is very easy:
+
+# More details and custom settings
+
+If you're a picky person and you don't like `Ansible_Vault` OR you want to
+point `lastpass-ansible` to an existing hierarchy of Vaults, just stick it
+to `.lastpass-ansible.conf`.  It's format is very easy:
 
 	# lastpass-ansible configuration file. For more details read:
 	# https://github.com/wkoszek/lastpass-ansible
@@ -54,6 +65,11 @@ The order of lookup for this LastPass site name is:
 1. `.lastpass-ansible.conf` file
 2. `LASTPASS_ANSIBLE_NAME` environment variable
 3. Name guessed based on a directory: "Ansible_Vault" + name
+
+It should be safe to commit `.lastpass-ansible.conf` to your repository.
+If you're paranoid, just use `LASTPASS_ANSIBLE_NAME` environment variable
+for passing this name. Otherwise just use the guessed name. I think it's the
+most convenient.
 
 [Ansible Vault]: http://docs.ansible.com/ansible/playbooks_vault.html
 [LastPass]: https://www.lastpass.com
