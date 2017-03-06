@@ -6,12 +6,17 @@ NAME = 'lastpass-ansible'
 CONFIG_NAME = '.lastpass-ansible.conf'
 LASTPASS_ANSIBLE_NAME = 'LASTPASS_ANSIBLE_NAME'
 LASTPASS_ANSIBLE_WRONG_PASS_SIM = 'LASTPASS_ANSIBLE_WRONG_PASS_SIM'
+CONFIG_FILE_INIT_CONTENT=<<_INIT
+# lastpass-ansible configuration file. For more details read:
+# https://github.com/wkoszek/lastpass-ansible
+_INIT
 
 def main
   if `which lpass`.length == 0
     errfail("You don't have the 'lpass' command tool")
   end
 
+  check_if_init
   lastpass_ansible_name = lastpass_ansible_name_get
   fail_if_terminal_output
   maybe_simulate_wrong_password
@@ -23,6 +28,20 @@ end
 def errfail(s)
   STDERR.puts "#{NAME}: #{s}\n"
   exit EX_USAGE
+end
+
+def check_if_init
+  has_init_passed = ARGV.select{|arg| arg =~ /^--init/ }.length > 0
+  if !has_init_passed
+    return
+  end
+  if File.exist?(CONFIG_NAME)
+    errfail("File #{CONFIG_NAME} exists!")
+  end
+  guessed_vault_name = File.basename(Dir.pwd)
+  File.write(CONFIG_NAME, CONFIG_FILE_INIT_CONTENT + guessed_vault_name)
+  print "Config file #{CONFIG_NAME} created; set password for #{guessed_vault_name} in Ansible\n"
+  exit 0
 end
 
 def lastpass_ansible_name_get
@@ -45,7 +64,8 @@ def read_config_file_recurse(directory)
     new_path_chunks[path_index] = CONFIG_NAME
     cfg_file_name = new_path_chunks[0..path_index].join('/')
     if File.exist?(cfg_file_name)
-      config_file_body = File.read(cfg_file_name).strip
+      config_file_body =
+        File.readlines(cfg_file_name).select{|l| l =~ /^[^#]/ }[0]
     end
   end
   return config_file_body
