@@ -14,44 +14,46 @@ Vault password.
 
 # How to use?
 
-Install the tool in the terminal:
+You install the tool in the terminal and point Ansible to it:
 
 	gem install lastpass-ansible
+	export ANSIBLE_VAULT_PASSWORD_FILE=`command -v lastpass-ansible`
 
-To use it:
+Now assume you're in your web application directory:
 
-1. Generate a password in Ansible by adding a new site or secure note
-2. Give it a name and save it.
-3. Put the name of this site in `.lastpass-ansible.conf`
+	cd ~/Projects/my_web_app
 
-**Example**
+To initialize everything, do:
 
-Let's create a "site" with a separate password:
+	lastpass-ansible --init
 
-![screenshot](doc/lastpass_ansible.png)
+This will create a new 30-character long password and put it in
+`Ansible_Vault/my_web_app` LastPass hierarchy. If you want to "transfer" your vault
+file `secrets.yml` to `lastpass-ansible`, copy the new password to clipboard:
 
-In the top directory of your project:
+	lpass show -c -p Ansible_Vault/my_web_app
 
-	$ pwd
-	/Users/wk/r/lnkr_xyz
+And just re-key (change password) for your existing vault:
 
-You'd do:
+	ansible-vault rekey secrets.yml
 
-	echo ansible_vault_lnkr_xyz > .lastpass-ansible.conf
-	git add .lastpass-ansible.conf
-	git commit -m "Add lastpass-ansible config to the project" .lastpass-ansible.conf
+Type your old password, and paste your new password.
 
-The `lastpass-ansible` will take this name, and use `lpass` (the
-[LastPass command line][] utility) and lookup its database of password, then
-pass it to Vault and unlock it.
+File `.lastpass-ansible.conf` has been created along with the password. You
+can remove this file if the hierarchy `Ansible_Vault/....` is fine with you.
+If you're a picky person OR you want to point `lastpass-ansible` to an
+existing hierarchy of Vaults, just stick it to `.lastpass-ansible.conf`.
+It's format is very easy:
 
-If you don't want to use a file-based approach for some reason, you can pass
-the name of the LastPass entry in the `LASTPASS_ANSIBLE_NAME` environment
-variable. So for the example above you'd need to do:
+	# lastpass-ansible configuration file. For more details read:
+	# https://github.com/wkoszek/lastpass-ansible
+	MyWebSites/my_web_app
 
-	export LASTPASS_ANSIBLE_NAME=ansible_vault_lnkr_xyz
+The order of lookup for this LastPass site name is:
 
-somewhere in your flow.
+1. `.lastpass-ansible.conf` file
+2. `LASTPASS_ANSIBLE_NAME` environment variable
+3. Name guessed based on a directory: "Ansible_Vault" + name
 
 [Ansible Vault]: http://docs.ansible.com/ansible/playbooks_vault.html
 [LastPass]: https://www.lastpass.com
