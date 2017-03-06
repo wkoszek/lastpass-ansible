@@ -6,6 +6,8 @@ NAME = 'lastpass-ansible'
 CONFIG_NAME = '.lastpass-ansible.conf'
 LASTPASS_ANSIBLE_NAME = 'LASTPASS_ANSIBLE_NAME'
 LASTPASS_ANSIBLE_WRONG_PASS_SIM = 'LASTPASS_ANSIBLE_WRONG_PASS_SIM'
+LASTPASS_ANSIBLE_PASSLEN = 30
+LASTPASS_ANSIBLE_PREFIX = "Ansible_Vault"
 CONFIG_FILE_INIT_CONTENT=<<_INIT
 # lastpass-ansible configuration file. For more details read:
 # https://github.com/wkoszek/lastpass-ansible
@@ -16,7 +18,8 @@ def main
     errfail("You don't have the 'lpass' command tool")
   end
 
-  check_if_init
+  check_if_logged_in
+  initialize_if_init
   lastpass_ansible_name = lastpass_ansible_name_get
   fail_if_terminal_output
   maybe_simulate_wrong_password
@@ -30,7 +33,13 @@ def errfail(s)
   exit EX_USAGE
 end
 
-def check_if_init
+def check_if_logged_in
+  if system("lpass status -q") == false
+    errfail("You must login first with: lpass login <login@name.com>")
+  end
+end
+
+def initialize_if_init
   has_init_passed = ARGV.select{|arg| arg =~ /^--init/ }.length > 0
   if !has_init_passed
     return
@@ -38,10 +47,34 @@ def check_if_init
   if File.exist?(CONFIG_NAME)
     errfail("File #{CONFIG_NAME} exists!")
   end
-  guessed_vault_name = File.basename(Dir.pwd)
-  File.write(CONFIG_NAME, CONFIG_FILE_INIT_CONTENT + guessed_vault_name)
-  print "Config file #{CONFIG_NAME} created; set password for #{guessed_vault_name} in Ansible\n"
+  initialize_project
   exit 0
+end
+
+def initialize_project
+  guessed_site_name = guess_site_name_by_directory
+  if lastpass_has_password(guessed_site_name)
+    errfail("LassPass already has password for #{guessed_site_name}")
+  end
+  c1 = system("lpass generate #{guessed_site_name} #{LASTPASS_ANSIBLE_PASSLEN} >/dev/null 2>&1")
+  if c1 != true
+    errfail("Couldn't initialize. Maybe #{guessed_site_name} exists?")
+  end
+  system("lpass sync") # --sync=now didn't work for me for 'lpass generate'
+  File.write(CONFIG_NAME, CONFIG_FILE_INIT_CONTENT + guessed_site_name)
+  print "Config file #{CONFIG_NAME} created; set password for #{guessed_site_name} in Ansible\n"
+end
+
+def guess_site_name_by_directory
+  return LASTPASS_ANSIBLE_PREFIX + "/" + File.basename(Dir.pwd)
+end
+
+def lastpass_has_password(site_name)
+  system("lpass sync")
+  return `lpass ls --color=never`
+    .split('\n')
+    .select{ |out_line| out_line =~ /^#{site_name}/ }
+    .length > 0
 end
 
 def lastpass_ansible_name_get
@@ -51,7 +84,7 @@ def lastpass_ansible_name_get
     lastpass_ansible_name = ENV[var_name]
   end
   if lastpass_ansible_name.nil?
-    errfail("Set Lastpass Vault account name via #{var_name}")
+    lastpass_ansible_name = guess_site_name_by_directory
   end
   return lastpass_ansible_name
 end
