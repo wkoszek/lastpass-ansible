@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'lastpass-ansible'
-  s.version     = '1.0.3'
+  s.version     = '1.0.4'
   s.summary     = 'Use LastPass to unlock Ansible Vault'
   s.description = "The #{s.name} lets you unlock Ansible Vault with password from LastPass"
   s.authors     = ['Wojciech Adam Koszek']
