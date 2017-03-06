@@ -5,7 +5,7 @@
 Script `lastpass-ansible` in this project will let you unlock [Ansible
 Vault][] with the password stored in [LastPass][]. This means you'll be able
 to run `ansible-playbook` and `ansible-vault` commands without being
-prompted for the password: it'll be taked from LastPass automatically.
+prompted for the password: it'll be taken from LastPass automatically.
 
 You can keep your Ansible Vault passwords along with your other
 secrets in LastPass, and not worry about forgetting your passwords.
