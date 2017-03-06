@@ -3,10 +3,14 @@
 [![Build Status](https://travis-ci.org/wkoszek/lastpass-ansible.svg?branch=master)](https://travis-ci.org/wkoszek/lastpass-ansible)
 
 Script `lastpass-ansible` in this project will let you unlock [Ansible
-Vault][] with the password stored in [LastPass][].  This way you can keep
-your Ansible Vault passwords along with your other secrets in LastPass, and
-not worry about forgetting your passwords less.  You can use LastPass strong
-password generator for your Ansible Vault too.
+Vault][] with the password stored in [LastPass][]. This means you'll be able
+to run `ansible-playbook` and `ansible-vault` commands without being
+prompted for the password: it'll be taked from LastPass automatically.
+
+You can keep your Ansible Vault passwords along with your other
+secrets in LastPass, and not worry about forgetting your passwords.
+You should also use LastPass's strong password generator for your Ansible
+Vault password.
 
 # How to use?
 
@@ -36,6 +40,10 @@ You'd do:
 	echo ansible_vault_lnkr_xyz > .lastpass-ansible.conf
 	git add .lastpass-ansible.conf
 	git commit -m "Add lastpass-ansible config to the project" .lastpass-ansible.conf
+
+The `lastpass-ansible` will take this name, and use `lpass` (the
+[LastPass command line][] utility) and lookup its database of password, then
+pass it to Vault and unlock it.
 
 [Ansible Vault]: http://docs.ansible.com/ansible/playbooks_vault.html
 [LastPass]: https://www.lastpass.com
