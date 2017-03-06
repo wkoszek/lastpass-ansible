@@ -1,35 +1,20 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 # Copyright 2017 Wojciech Adam Koszek <wojciech@koszek.com>
 
 EX_USAGE = 64
-NAME = "lastpass-ansible"
-CONFIG_NAME = ".lastpass-ansible.conf"
+NAME = 'lastpass-ansible'
+CONFIG_NAME = '.lastpass-ansible.conf'
+LASTPASS_ANSIBLE_NAME = 'LASTPASS_ANSIBLE_NAME'
+LASTPASS_ANSIBLE_WRONG_PASS_SIM = 'LASTPASS_ANSIBLE_WRONG_PASS_SIM'
 
 def main
-  if `which lpass`.length() == 0 then
+  if `which lpass`.length == 0
     errfail("You don't have the 'lpass' command tool")
   end
 
-  lastpass_ansible_name = read_config_file_recurse(Dir.pwd())
-  var_name = "LASTPASS_ANSIBLE_NAME"
-  if ENV.has_key?(var_name) then
-    lastpass_ansible_name = ENV[var_name]
-  end
-  if lastpass_ansible_name.nil? then
-    errfail("Set Lastpass Vault account name via #{var_name}")
-  end
-
-  stdout = IO.try_convert(STDOUT)
-  if stdout == nil or stdout.isatty then
-    errfail("Won't print Ansible Vault password to terminal")
-  end
-
-  var_name = "LASTPASS_ANSIBLE_WRONG_PASS_SIM"
-  if ENV.has_key?(var_name) then
-    print "WrongPassword"
-    exit 0
-  end
-
+  lastpass_ansible_name = lastpass_ansible_name_get
+  fail_if_terminal_output
+  maybe_simulate_wrong_password
   system("lpass show --password #{lastpass_ansible_name}")
 end
 
@@ -40,20 +25,45 @@ def errfail(s)
   exit EX_USAGE
 end
 
+def lastpass_ansible_name_get
+  lastpass_ansible_name = read_config_file_recurse(Dir.pwd)
+  var_name = LASTPASS_ANSIBLE_NAME
+  if ENV.key?(var_name)
+    lastpass_ansible_name = ENV[var_name]
+  end
+  if lastpass_ansible_name.nil?
+    errfail("Set Lastpass Vault account name via #{var_name}")
+  end
+  return lastpass_ansible_name
+end
+
 def read_config_file_recurse(directory)
-  path_chunks = directory.split("/")
+  path_chunks = directory.split('/')
   config_file_body = nil
-  path_chunks.length().downto(1) { |path_index|
+  path_chunks.length.downto(1) do |path_index|
     new_path_chunks = path_chunks
     new_path_chunks[path_index] = CONFIG_NAME
-    cfg_file_name = new_path_chunks[0..path_index].join("/")
-    #print "#{cfg_file_name}\n"
-    if File.exists?(cfg_file_name) then
-      #print "#{cfg_file_name} exists\n"
+    cfg_file_name = new_path_chunks[0..path_index].join('/')
+    if File.exist?(cfg_file_name)
       config_file_body = File.read(cfg_file_name).strip
     end
-  }
+  end
   return config_file_body
+end
+
+def fail_if_terminal_output
+  stdout = IO.try_convert(STDOUT)
+  if stdout.nil? || stdout.isatty
+    errfail("Won't print Ansible Vault password to terminal")
+  end
+end
+
+def maybe_simulate_wrong_password
+  var_name = LASTPASS_ANSIBLE_WRONG_PASS_SIM
+  if ENV.key?(var_name)
+    print 'WrongPassword'
+    exit 0
+  end
 end
 
 #--------
