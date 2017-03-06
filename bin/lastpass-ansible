@@ -3,30 +3,59 @@
 
 EX_USAGE = 64
 NAME = "lastpass-ansible"
+CONFIG_NAME = ".lastpass-ansible.conf"
+
+def main
+  if `which lpass`.length() == 0 then
+    errfail("You don't have the 'lpass' command tool")
+  end
+
+  lastpass_ansible_name = read_config_file_recurse(Dir.pwd())
+  var_name = "LASTPASS_ANSIBLE_NAME"
+  if ENV.has_key?(var_name) then
+    lastpass_ansible_name = ENV[var_name]
+  end
+  if lastpass_ansible_name.nil? then
+    errfail("Set Lastpass Vault account name via #{var_name}")
+  end
+
+  stdout = IO.try_convert(STDOUT)
+  if stdout == nil or stdout.isatty then
+    errfail("Won't print Ansible Vault password to terminal")
+  end
+
+  var_name = "LASTPASS_ANSIBLE_WRONG_PASS_SIM"
+  if ENV.has_key?(var_name) then
+    print "WrongPassword"
+    exit 0
+  end
+
+  system("lpass show --password #{lastpass_ansible_name}")
+end
+
+#--------
 
 def errfail(s)
   STDERR.puts "#{NAME}: #{s}\n"
   exit EX_USAGE
 end
 
-if `which lpass`.length() == 0 then
-  errfail("You don't have the 'lpass' command tool")
+def read_config_file_recurse(directory)
+  path_chunks = directory.split("/")
+  config_file_body = nil
+  path_chunks.length().downto(1) { |path_index|
+    new_path_chunks = path_chunks
+    new_path_chunks[path_index] = CONFIG_NAME
+    cfg_file_name = new_path_chunks[0..path_index].join("/")
+    #print "#{cfg_file_name}\n"
+    if File.exists?(cfg_file_name) then
+      #print "#{cfg_file_name} exists\n"
+      config_file_body = File.read(cfg_file_name).strip
+    end
+  }
+  return config_file_body
 end
 
-var_name = "LASTPASS_ANSIBLE_NAME"
-if not ENV.has_key?(var_name) then
-  errfail("Set Lastpass Vault account name via #{var_name}")
-end
+#--------
 
-stdout = IO.try_convert(STDOUT)
-if stdout == nil or stdout.isatty then
-  errfail("Won't print Ansible Vault password to terminal")
-end
-
-var_name = "LASTPASS_ANSIBLE_WRONG_PASS_SIM"
-if ENV.has_key?(var_name) then
-  print "WrongPassword"
-  exit 0
-end
-
-system("lpass show --password #{ENV['LASTPASS_ANSIBLE_NAME']}")
+main
