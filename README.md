@@ -45,6 +45,14 @@ The `lastpass-ansible` will take this name, and use `lpass` (the
 [LastPass command line][] utility) and lookup its database of password, then
 pass it to Vault and unlock it.
 
+If you don't want to use a file-based approach for some reason, you can pass
+the name of the LastPass entry in the `LASTPASS_ANSIBLE_NAME` environment
+variable. So for the example above you'd need to do:
+
+	export LASTPASS_ANSIBLE_NAME=ansible_vault_lnkr_xyz
+
+somewhere in your flow.
+
 [Ansible Vault]: http://docs.ansible.com/ansible/playbooks_vault.html
 [LastPass]: https://www.lastpass.com
 
