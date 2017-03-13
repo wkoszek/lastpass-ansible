@@ -83,3 +83,5 @@ most convenient.
 
 - Wojciech Adam Koszek, [wojciech@koszek.com](mailto:wojciech@koszek.com)
 - [http://www.koszek.com](http://www.koszek.com)
+- Twitter: [@wkoszek](https://twitter.com/wkoszek)
+- LinkedIn: [wkoszek](https://www.linkedin.com/in/wkoszek)
