@@ -31,36 +31,41 @@ Now assume you're in your web application directory:
 
 	cd ~/Projects/my_web_app
 
-To initialize everything, do:
+Now do:
 
 	lastpass-ansible --init
 
-This will create a new 30-character long password and put it in
-`Ansible_Vault/my_web_app` LastPass hierarchy. If you want to "transfer" your vault
-file `secrets.yml` to `lastpass-ansible`, copy the new password to clipboard:
+This will create a new "site" in LastPass in the hierarchy `Ansible_Vault/my_web_app`.
+It'll also generate a 30-character password for this site.
+
+**If you want to stick to your current Vault password**
+
+Just go to LastPass, edit the site in `Ansible_Vault/my_web_app` and put your password there. Save.
+
+**If you want to use the new password:**
 
 	lpass show -c -p Ansible_Vault/my_web_app
-
-And just re-key (change password) for your existing vault:
-
 	ansible-vault rekey secrets.yml
 
-Type your old password, and paste your new password.
+First command copies the newly generated password to the clipboard, and the second one will replace the old password with the new one. It's so called re-keying the Vault. Clear the clipboard afterwards.
 
-File `.lastpass-ansible.conf` has been created along with the password. You
-can remove this file if the hierarchy `Ansible_Vault/....` is fine with you.
 
 # More details and custom settings
 
+File `.lastpass-ansible.conf` has been created along with the password. It just
+tells `lastpass-ansible` which LastPass site to use to get the proper password.
+If you're fine with `Ansible_Vault/...`, then you can remove this file. It's a
+default lookup location.
+
 If you're a picky person and you don't like `Ansible_Vault` OR you want to
-point `lastpass-ansible` to an existing hierarchy of Vaults, just stick it
+point `lastpass-ansible` to an existing hierarchy of sites in LastPass, just stick it
 to `.lastpass-ansible.conf`.  It's format is very easy:
 
 	# lastpass-ansible configuration file. For more details read:
 	# https://github.com/wkoszek/lastpass-ansible
 	MyWebSites/my_web_app
 
-The order of lookup for this LastPass site name is:
+And it'll work. The order of lookup for this LastPass site name is:
 
 1. `.lastpass-ansible.conf` file
 2. `LASTPASS_ANSIBLE_NAME` environment variable
