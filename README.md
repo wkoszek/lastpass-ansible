@@ -79,6 +79,10 @@ most convenient.
 [Ansible Vault]: http://docs.ansible.com/ansible/playbooks_vault.html
 [LastPass]: https://www.lastpass.com
 
+## More
+
+- [How to use Ansible Vault with LastPass](https://www.koszek.com/blog/2017/03/05/how-to-use-ansible-vault-with-lastpass/)
+
 ## Author
 
 - Wojciech Adam Koszek, [wojciech@koszek.com](mailto:wojciech@koszek.com)
